@@ -1150,10 +1150,11 @@ a.channel:hover {
   text-align: center;
 }
 
+/* display:flex anula el atributo [hidden] del HTML; solo visible sin hidden */
 .form-success {
   position: absolute;
   inset: 0;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -1163,6 +1164,14 @@ a.channel:hover {
   padding: 32px;
   text-align: center;
   z-index: 5;
+}
+
+.form-success:not([hidden]) {
+  display: flex;
+}
+
+.form-success[hidden] {
+  display: none !important;
 }
 
 .form-success svg {
