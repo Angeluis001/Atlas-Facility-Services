@@ -69,7 +69,29 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true, lead: rows[0] });
     }
 
-    return methodNotAllowed(res, "GET, PATCH");
+    if (req.method === "DELETE") {
+      const body = readBody(req);
+      const id = sanitize(body.id, 40);
+      if (!id) return json(res, 400, { ok: false, error: "id requerido" });
+
+      const existing = await sql`
+        SELECT id, status FROM leads WHERE id = ${id} LIMIT 1
+      `;
+      if (!existing.length) {
+        return json(res, 404, { ok: false, error: "Lead no encontrado" });
+      }
+      if (existing[0].status !== "descartado") {
+        return json(res, 400, {
+          ok: false,
+          error: "Solo se pueden borrar leads en estado descartado",
+        });
+      }
+
+      await sql`DELETE FROM leads WHERE id = ${id}`;
+      return json(res, 200, { ok: true });
+    }
+
+    return methodNotAllowed(res, "GET, PATCH, DELETE");
   } catch (err) {
     console.error("[admin/leads]", err);
     return json(res, 500, { ok: false, error: "Error en leads" });

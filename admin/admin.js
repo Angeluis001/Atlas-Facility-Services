@@ -244,9 +244,14 @@
         </td>
         <td class="actions">
           <button type="button" class="btn-sm convert-lead" data-id="${esc(l.id)}" ${
-          l.status === "convertido" ? "disabled" : ""
+          l.status === "convertido" || l.status === "descartado" ? "disabled" : ""
         }>→ Cliente</button>
           <button type="button" class="btn-sm view-lead" data-id="${esc(l.id)}">Ver</button>
+          ${
+            l.status === "descartado"
+              ? `<button type="button" class="btn-sm danger delete-lead" data-id="${esc(l.id)}">Borrar</button>`
+              : ""
+          }
         </td>
       </tr>`;
       })
@@ -260,6 +265,7 @@
             body: JSON.stringify({ id: sel.dataset.id, status: sel.value }),
           });
           toast("Estado actualizado");
+          loadLeads();
           loadDashboard();
         } catch (e) {
           toast(e.message, true);
@@ -276,6 +282,23 @@
             body: JSON.stringify({ leadId: btn.dataset.id }),
           });
           toast("Cliente creado");
+          loadLeads();
+          loadDashboard();
+        } catch (e) {
+          toast(e.message, true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll(".delete-lead").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("¿Borrar este lead descartado de forma permanente?")) return;
+        try {
+          await api("/api/admin/leads", {
+            method: "DELETE",
+            body: JSON.stringify({ id: btn.dataset.id }),
+          });
+          toast("Lead eliminado");
           loadLeads();
           loadDashboard();
         } catch (e) {
