@@ -7,6 +7,27 @@
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+  // Hero: palabra rotativa (Casa · Negocio · Taller · Edificio)
+  const rotatingWord = document.getElementById("rotatingWord");
+  if (rotatingWord && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const words = ["edificio", "casa", "negocio", "taller"];
+    let index = 0;
+    setInterval(() => {
+      rotatingWord.classList.add("is-out");
+      setTimeout(() => {
+        index = (index + 1) % words.length;
+        rotatingWord.textContent = words[index];
+        rotatingWord.classList.remove("is-out");
+        rotatingWord.classList.add("is-in");
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            rotatingWord.classList.remove("is-in");
+          });
+        });
+      }, 350);
+    }, 2000);
+  }
+
   // Header scroll state
   const header = document.getElementById("header");
   const onScrollHeader = () => {
