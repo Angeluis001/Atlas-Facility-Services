@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Atlas Facility Services — Soluciones integrales en HVAC, eléctrico, plomería, pintura, mantenimiento general y seguridad electrónica. Resultados confiables." />
+  <title>Atlas Facility Services | Soluciones Integrales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+</head>
+<body>
+  <!-- Cursor glow -->
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <!-- Background ambient -->
+  <div class="bg-ambient" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Navigation -->
+  <header class="header" id="header">
+    <nav class="nav container">
+      <a href="#inicio" class="nav-brand">
+        <img src="assets/logo.png" alt="Atlas Facility Services" class="nav-logo" />
+        <span class="nav-brand-text">ATLAS<span class="nav-brand-sub">Facility Services</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+        <li><a href="#servicios" class="nav-link">Servicios</a></li>
+        <li><a href="#por-que" class="nav-link">Por qué Atlas</a></li>
+        <li><a href="#proceso" class="nav-link">Proceso</a></li>
+        <li><a href="#contacto" class="nav-link nav-cta">Cotizar ahora</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero" id="inicio">
+      <div class="hero-content container">
+        <div class="hero-badge reveal">
+          <span class="badge-dot"></span>
+          Soluciones integrales · Resultados confiables
+        </div>
+        <h1 class="hero-title reveal">
+          Tu edificio en
+          <span class="title-gradient">manos expertas</span>
+        </h1>
+        <p class="hero-subtitle reveal">
+          HVAC · Eléctrico · Plomería · Pintura · Mantenimiento · Seguridad electrónica.
+          Un solo aliado para que tu operación no se detenga.
+        </p>
+        <div class="hero-actions reveal">
+          <a href="#contacto" class="btn btn-primary">
+            <span>Solicitar cotización</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#servicios" class="btn btn-ghost">
+            <span>Ver servicios</span>
+          </a>
+        </div>
+        <div class="hero-stats reveal">
+          <div class="stat">
+            <span class="stat-value" data-count="6">0</span>
+            <span class="stat-label">Especialidades</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value" data-count="24">0</span><span class="stat-suffix">/7</span>
+            <span class="stat-label">Disponibilidad</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value" data-count="100">0</span><span class="stat-suffix">%</span>
+            <span class="stat-label">Compromiso</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-ring">
+          <div class="ring-track"></div>
+          <div class="ring-icons">
+            <div class="ring-icon" style="--i:0" title="Mantenimiento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+            <div class="ring-icon" style="--i:1" title="Eléctrico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="ring-icon" style="--i:2" title="HVAC"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="ring-icon" style="--i:3" title="Pintura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 3v4H6V3"/><path d="M12 7v14"/><rect x="4" y="3" width="16" height="4" rx="1"/></svg></div>
+            <div class="ring-icon" style="--i:4" title="Seguridad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+            <div class="ring-icon" style="--i:5" title="Cámaras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+            <div class="ring-icon" style="--i:6" title="Plomería"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6"/><path d="M8 8h8"/><path d="M7 8c0 5 5 7 5 12"/><path d="M17 8c0 5-5 7-5 12"/><circle cx="12" cy="21" r="1"/></svg></div>
+          </div>
+          <div class="hero-logo-core">
+            <img src="assets/logo.png" alt="" />
+          </div>
+        </div>
+      </div>
+      <div class="hero-scroll">
+        <a href="#servicios" class="scroll-hint">
+          <span>Explorar</span>
+          <div class="scroll-line"></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section class="section services" id="servicios">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag">Lo que hacemos</span>
+          <h2 class="section-title">Seis pilares.<br /><span class="text-accent">Una sola operación.</span></h2>
+          <p class="section-desc">Todo lo que tu edificio necesita, coordinado por un equipo que entiende la criticidad de cada sistema.</p>
+        </div>
+        <div class="services-grid">
+          <article class="service-card reveal" data-service="hvac">
+            <div class="service-icon">
+              <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.5 9.5l4.2 4.2M34.3 34.3l4.2 4.2M9.5 38.5l4.2-4.2M34.3 13.7l4.2-4.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>HVAC</h3>
+            <p>Climatización, ventilación y control de temperatura para ambientes productivos y confortables.</p>
+            <ul class="service-list">
+              <li>Instalación y mantenimiento</li>
+              <li>Diagnóstico y reparación</li>
+              <li>Eficiencia energética</li>
+            </ul>
+            <a href="#contacto" class="service-link">Cotizar <span>→</span></a>
+          </article>
+
+          <article class="service-card reveal" data-service="electrico">
+            <div class="service-icon">
+              <svg viewBox="0 0 48 48" fill="none"><path d="M26 4L10 26h14l-2 18 16-22H24l2-18z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Eléctrico</h3>
+            <p>Instalaciones seguras, tableros, iluminación y soluciones de fuerza para comercial e industrial.</p>
+            <ul class="service-list">
+              <li>Instalaciones nuevas</li>
+              <li>Mantenimiento preventivo</li>
+              <li>Corrección de fallas</li>
+            </ul>
+            <a href="#contacto" class="service-link">Cotizar <span>→</span></a>
+          </article>
+
+          <article class="service-card reveal" data-service="plomeria">
+            <div class="service-icon">
+              <svg viewBox="0 0 48 48" fill="none"><path d="M24 6v10M16 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 16c0 10 10 14 10 24M34 16c0 10-10 14-10 24" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="42" r="2" fill="currentColor"/></svg>
+            </div>
+            <h3>Plomería</h3>
+            <p>Redes hidráulicas, sanitarias y detección de fugas con respuesta rápida y trabajo limpio.</p>
+            <ul class="service-list">
+              <li>Reparaciones urgentes</li>
+              <li>Instalaciones completas</li>
+              <li>Mantenimiento de redes</li>
+            </ul>
+            <a href="#contacto" class="service-link">Cotizar <span>→</span></a>
+          </article>
+
+          <article class="service-card reveal" data-service="pintura">
+            <div class="service-icon">
+              <svg viewBox="0 0 48 48" fill="none"><rect x="10" y="8" width="28" height="8" rx="2" stroke="currentColor" stroke-width="2"/><path d="M24 16v24M18 40h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Pintura</h3>
+            <p>Acabados profesionales para interiores y exteriores que protegen y elevan la imagen de tu espacio.</p>
+            <ul class="service-list">
+              <li>Comercial e industrial</li>
+              <li>Preparación de superficies</li>
+              <li>Recubrimientos especiales</li>
+            </ul>
+            <a href="#contacto" class="service-link">Cotizar <span>→</span></a>
+          </article>
+
+          <article class="service-card reveal" data-service="mantenimiento">
+            <div class="service-icon">
+              <svg viewBox="0 0 48 48" fill="none"><path d="M28 12a4 4 0 0 0 0 5.6l3.2 3.2a4 4 0 0 0 5.6 0l7.5-7.5a12 12 0 0 1-15.9 15.9L14 43.7a4.2 4.2 0 0 1-6-6l14.4-14.4A12 12 0 0 1 38.3 7.4L30.8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Mantenimiento general</h3>
+            <p>Planes preventivos y correctivos para que cada sistema de tu inmueble funcione sin sorpresas.</p>
+            <ul class="service-list">
+              <li>Planes a medida</li>
+              <li>Inspecciones periódicas</li>
+              <li>Respuesta multi-técnica</li>
+            </ul>
+            <a href="#contacto" class="service-link">Cotizar <span>→</span></a>
+          </article>
+
+          <article class="service-card reveal" data-service="seguridad">
+            <div class="service-icon">
+              <svg viewBox="0 0 48 48" fill="none"><path d="M24 44s16-8 16-20V10L24 4 8 10v14c0 12 16 20 16 20z" stroke="currentColor" stroke-width="2"/><rect x="18" y="20" width="12" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M21 20v-3a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="2"/></svg>
+            </div>
+            <h3>Seguridad electrónica</h3>
+            <p>CCTV, control de acceso y sistemas de protección para resguardar personas y activos.</p>
+            <ul class="service-list">
+              <li>Cámaras y monitoreo</li>
+              <li>Control de accesos</li>
+              <li>Alarmas e integración</li>
+            </ul>
+            <a href="#contacto" class="service-link">Cotizar <span>→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Atlas -->
+    <section class="section why" id="por-que">
+      <div class="container">
+        <div class="why-layout">
+          <div class="why-content reveal">
+            <span class="section-tag">Por qué Atlas</span>
+            <h2 class="section-title">No somos un proveedor más.<br /><span class="text-accent">Somos tu equipo de planta.</span></h2>
+            <p class="section-desc">
+              Coordinamos especialidades, anticipamos fallas y respondemos con la seriedad que exige un edificio en operación.
+            </p>
+            <div class="why-list">
+              <div class="why-item">
+                <div class="why-num">01</div>
+                <div>
+                  <h4>Un solo punto de contacto</h4>
+                  <p>HVAC, eléctrico, plomería y más — sin perseguir a tres contratistas distintos.</p>
+                </div>
+              </div>
+              <div class="why-item">
+                <div class="why-num">02</div>
+                <div>
+                  <h4>Enfoque en continuidad</h4>
+                  <p>Priorizamos que tu operación siga corriendo: diagnóstico claro y ejecución limpia.</p>
+                </div>
+              </div>
+              <div class="why-item">
+                <div class="why-num">03</div>
+                <div>
+                  <h4>Resultados medibles</h4>
+                  <p>Compromiso con calidad, tiempos y comunicación transparente en cada visita.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="why-visual reveal">
+            <div class="why-card glass">
+              <div class="why-card-glow"></div>
+              <img src="assets/logo.png" alt="Atlas Facility Services" class="why-logo" />
+              <blockquote>
+                <p>“Soluciones integrales.<br />Resultados confiables.”</p>
+              </blockquote>
+              <div class="why-tags">
+                <span>HVAC</span>
+                <span>Eléctrico</span>
+                <span>Plomería</span>
+                <span>Pintura</span>
+                <span>Mantenimiento</span>
+                <span>Seguridad</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Process -->
+    <section class="section process" id="proceso">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag">Cómo trabajamos</span>
+          <h2 class="section-title">De la solicitud al<br /><span class="text-accent">resultado, sin fricción.</span></h2>
+        </div>
+        <div class="process-track">
+          <div class="process-step reveal">
+            <div class="step-marker"><span>1</span></div>
+            <h3>Contacto</h3>
+            <p>Cuéntanos qué necesitas: urgencia, ubicación y tipo de servicio.</p>
+          </div>
+          <div class="process-step reveal">
+            <div class="step-marker"><span>2</span></div>
+            <h3>Diagnóstico</h3>
+            <p>Evaluamos el sitio o el sistema y te presentamos un plan claro.</p>
+          </div>
+          <div class="process-step reveal">
+            <div class="step-marker"><span>3</span></div>
+            <h3>Ejecución</h3>
+            <p>Técnicos especializados realizan el trabajo con estándares profesionales.</p>
+          </div>
+          <div class="process-step reveal">
+            <div class="step-marker"><span>4</span></div>
+            <h3>Seguimiento</h3>
+            <p>Validamos el resultado y dejamos todo listo para la siguiente etapa.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA banner -->
+    <section class="cta-banner">
+      <div class="container">
+        <div class="cta-inner reveal">
+          <div class="cta-text">
+            <h2>¿Listo para elevar el estándar de tu instalación?</h2>
+            <p>Agenda una evaluación o pide cotización. Respondemos con rapidez y claridad.</p>
+          </div>
+          <a href="#contacto" class="btn btn-primary btn-lg">
+            <span>Hablar con Atlas</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section contact" id="contacto">
+      <div class="container">
+        <div class="contact-layout">
+          <div class="contact-info reveal">
+            <span class="section-tag">Contacto</span>
+            <h2 class="section-title">Cuéntanos tu proyecto</h2>
+            <p class="section-desc">Completa el formulario y te contactamos. También puedes escribirnos o llamarnos directamente.</p>
+            <div class="contact-channels">
+              <a href="mailto:contacto@atlasfacility.mx" class="channel">
+                <div class="channel-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+                </div>
+                <div>
+                  <span class="channel-label">Email</span>
+                  <span class="channel-value">contacto@atlasfacility.mx</span>
+                </div>
+              </a>
+              <a href="tel:+525500000000" class="channel">
+                <div class="channel-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div>
+                  <span class="channel-label">Teléfono</span>
+                  <span class="channel-value">+52 55 0000 0000</span>
+                </div>
+              </a>
+              <div class="channel">
+                <div class="channel-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                  <span class="channel-label">Cobertura</span>
+                  <span class="channel-value">Zona metropolitana y alrededores</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <form class="contact-form glass reveal" id="contactForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Nombre</label>
+                <input type="text" id="name" name="name" placeholder="Tu nombre" required autocomplete="name" />
+              </div>
+              <div class="form-group">
+                <label for="company">Empresa</label>
+                <input type="text" id="company" name="company" placeholder="Nombre de la empresa" autocomplete="organization" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="correo@empresa.com" required autocomplete="email" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Teléfono</label>
+                <input type="tel" id="phone" name="phone" placeholder="+52 ..." autocomplete="tel" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="service">Servicio de interés</label>
+              <select id="service" name="service">
+                <option value="">Selecciona un servicio</option>
+                <option value="hvac">HVAC</option>
+                <option value="electrico">Eléctrico</option>
+                <option value="plomeria">Plomería</option>
+                <option value="pintura">Pintura</option>
+                <option value="mantenimiento">Mantenimiento general</option>
+                <option value="seguridad">Seguridad electrónica</option>
+                <option value="varios">Varios / integral</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Mensaje</label>
+              <textarea id="message" name="message" rows="4" placeholder="Describe brevemente lo que necesitas..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+              <span>Enviar solicitud</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+            <p class="form-note">Al enviar aceptas que te contactemos respecto a tu solicitud.</p>
+            <div class="form-success" id="formSuccess" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+              <p>¡Gracias! Recibimos tu mensaje. Te contactaremos pronto.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="Atlas" class="footer-logo" />
+          <div>
+            <strong>ATLAS</strong>
+            <span>Facility Services</span>
+          </div>
+        </div>
+        <p class="footer-tagline">Soluciones integrales. Resultados confiables.</p>
+        <div class="footer-services">
+          <span>HVAC</span>
+          <span>Eléctrico</span>
+          <span>Plomería</span>
+          <span>Pintura</span>
+          <span>Mantenimiento general</span>
+          <span>Seguridad electrónica</span>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="year"></span> Atlas Facility Services. Todos los derechos reservados.</p>
+        <a href="#inicio" class="back-top">Volver arriba ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
