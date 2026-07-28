@@ -1,0 +1,17 @@
+{
+  "name": "atlas-facility-services",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sitio web y API de Atlas Facility Services (Vercel + Neon)",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

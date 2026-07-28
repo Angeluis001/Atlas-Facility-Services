@@ -136,37 +136,65 @@
     });
   });
 
-  // Contact form
+  // Contact form → API Neon (POST /api/leads)
   const form = document.getElementById("contactForm");
   const success = document.getElementById("formSuccess");
 
-  form?.addEventListener("submit", (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
-    // Demo: show success UI. Wire to backend/email later.
     const btn = form.querySelector('button[type="submit"]');
+    const label = btn?.querySelector("span");
+    const original = label?.textContent || "Enviar solicitud";
+
     if (btn) {
       btn.disabled = true;
-      btn.querySelector("span").textContent = "Enviando…";
+      if (label) label.textContent = "Enviando…";
     }
 
-    setTimeout(() => {
-      if (success) {
-        success.hidden = false;
+    const payload = {
+      name: form.name.value,
+      company: form.company.value,
+      email: form.email.value,
+      phone: form.phone.value,
+      service: form.service.value,
+      message: form.message.value,
+    };
+
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Error al enviar");
       }
+
+      if (success) success.hidden = false;
       form.reset();
-      if (btn) {
-        btn.disabled = false;
-        btn.querySelector("span").textContent = "Enviar solicitud";
-      }
       setTimeout(() => {
         if (success) success.hidden = true;
       }, 5000);
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      alert(
+        err.message ||
+          "No se pudo enviar la solicitud. Escribe a angeluis012@hotmail.com o llama al +52 624 100 0381."
+      );
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        if (label) label.textContent = original;
+      }
+    }
   });
 
   // Prefill service from service cards
