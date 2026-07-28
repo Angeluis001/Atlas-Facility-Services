@@ -238,7 +238,7 @@
         <td>${esc(serviceLabels[l.service] || l.service || "—")}</td>
         <td><div class="cell-msg" title="${esc(l.message)}">${esc(l.message)}</div></td>
         <td>
-          <select class="lead-status" data-id="${esc(l.id)}" style="min-width:120px;padding:6px 8px;font-size:0.82rem">
+          <select class="lead-status" data-id="${esc(l.id)}">
             ${options}
           </select>
         </td>
@@ -434,7 +434,7 @@
         <td>${esc(serviceLabels[p.service_type] || p.service_type || "—")}</td>
         <td>${money(p.budget_cents, p.currency || "MXN")}</td>
         <td>
-          <select class="proj-status" data-id="${esc(p.id)}" style="min-width:120px;padding:6px 8px;font-size:0.82rem">
+          <select class="proj-status" data-id="${esc(p.id)}">
             ${["pendiente", "en_progreso", "completado", "pausado", "cancelado"]
               .map(
                 (s) =>

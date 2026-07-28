@@ -621,6 +621,37 @@ tr:hover td { background: rgba(59, 130, 246, 0.04); }
 .toast[hidden] { display: none; }
 .toast.error { border-color: rgba(248, 113, 113, 0.5); color: #fecaca; }
 
+/* Selects en tablas (Estado leads / proyectos) — contraste en tema oscuro */
+table select,
+.lead-status,
+.proj-status {
+  min-width: 120px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  color: var(--text);
+  background-color: #0a1220;
+  background-image: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+table select:focus,
+.lead-status:focus,
+.proj-status:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+table select option,
+.lead-status option,
+.proj-status option {
+  color: #e8eef8;
+  background-color: #0a1220;
+}
+
 @media (max-width: 1100px) {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
