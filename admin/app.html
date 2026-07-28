@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Atlas Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+</head>
+<body class="app-body">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="../assets/logo.png" alt="" />
+      <div>
+        <strong>ATLAS</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button type="button" class="nav-item active" data-view="dashboard">Dashboard</button>
+      <button type="button" class="nav-item" data-view="leads">Leads <span class="badge" id="badgeLeads" hidden>0</span></button>
+      <button type="button" class="nav-item" data-view="clients">Clientes</button>
+      <button type="button" class="nav-item" data-view="projects">Proyectos</button>
+      <button type="button" class="nav-item" data-view="finance">Finanzas</button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-chip" id="userChip">—</div>
+      <button type="button" class="btn-ghost" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="topbar">
+      <button type="button" class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <h2 id="viewTitle">Dashboard</h2>
+      <a href="/" class="top-link" target="_blank" rel="noopener">Ver sitio ↗</a>
+    </header>
+
+    <main class="content">
+      <!-- Dashboard -->
+      <section class="view active" id="view-dashboard">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Leads recientes</h3>
+            <button type="button" class="btn-text" data-goto="leads">Ver todos</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Nombre</th><th>Servicio</th><th>Estado</th><th>Fecha</th></tr>
+              </thead>
+              <tbody id="recentLeadsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Leads -->
+      <section class="view" id="view-leads">
+        <div class="toolbar">
+          <input type="search" id="leadSearch" placeholder="Buscar nombre, email, empresa…" />
+          <select id="leadStatusFilter">
+            <option value="">Todos los estados</option>
+            <option value="nuevo">Nuevo</option>
+            <option value="contactado">Contactado</option>
+            <option value="calificado">Calificado</option>
+            <option value="convertido">Convertido</option>
+            <option value="descartado">Descartado</option>
+          </select>
+          <button type="button" class="btn-primary" id="refreshLeads">Actualizar</button>
+        </div>
+        <div class="table-wrap panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Contacto</th>
+                <th>Servicio</th>
+                <th>Mensaje</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="leadsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Clients -->
+      <section class="view" id="view-clients">
+        <div class="toolbar">
+          <button type="button" class="btn-primary" id="newClientBtn">+ Nuevo cliente</button>
+        </div>
+        <div class="table-wrap panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Contacto</th>
+                <th>Ubicación</th>
+                <th>Proyectos</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Projects -->
+      <section class="view" id="view-projects">
+        <div class="toolbar">
+          <button type="button" class="btn-primary" id="newProjectBtn">+ Nuevo proyecto</button>
+        </div>
+        <div class="table-wrap panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Proyecto</th>
+                <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Presupuesto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="projectsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Finance -->
+      <section class="view" id="view-finance">
+        <div class="stat-grid compact" id="financeStats"></div>
+        <div class="toolbar">
+          <button type="button" class="btn-primary" id="newFinanceBtn">+ Movimiento</button>
+        </div>
+        <div class="table-wrap panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Cliente / Proyecto</th>
+                <th>Monto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="financeBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modalTitle">—</h3>
+        <button type="button" class="icon-btn" data-close aria-label="Cerrar">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <script src="admin.js"></script>
+</body>
+</html>
