@@ -359,6 +359,73 @@
     searchTimer = setTimeout(() => loadLeads().catch((e) => toast(e.message, true)), 300);
   });
 
+  document.getElementById("newLeadBtn").addEventListener("click", () => {
+    const serviceOpts = Object.entries(serviceLabels)
+      .map(([k, v]) => `<option value="${k}">${v}</option>`)
+      .join("");
+    openModal(
+      "Nuevo lead (manual)",
+      `
+      <label>Nombre * <input id="lName" required autocomplete="name" /></label>
+      <label>Empresa <input id="lCompany" autocomplete="organization" /></label>
+      <label>Email * <input id="lEmail" type="email" required autocomplete="email" /></label>
+      <label>Teléfono <input id="lPhone" type="tel" autocomplete="tel" /></label>
+      <label>Servicio
+        <select id="lService">
+          <option value="">—</option>
+          ${serviceOpts}
+        </select>
+      </label>
+      <label>Estado
+        <select id="lStatus">
+          <option value="nuevo" selected>nuevo</option>
+          <option value="contactado">contactado</option>
+          <option value="calificado">calificado</option>
+          <option value="convertido">convertido</option>
+          <option value="descartado">descartado</option>
+        </select>
+      </label>
+      <label>Mensaje / notas del contacto * <textarea id="lMessage" required placeholder="Cómo llegó, qué necesita…"></textarea></label>
+      <label>Notas internas <textarea id="lNotes" placeholder="Solo visibles en admin"></textarea></label>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" data-close>Cancelar</button>
+        <button type="button" class="btn-primary" id="saveLead">Guardar lead</button>
+      </div>
+    `
+    );
+    modalBody.querySelector("[data-close]")?.addEventListener("click", closeModal);
+    document.getElementById("saveLead").addEventListener("click", async () => {
+      const name = document.getElementById("lName").value.trim();
+      const email = document.getElementById("lEmail").value.trim();
+      const message = document.getElementById("lMessage").value.trim();
+      if (!name || !email || !message) {
+        return toast("Nombre, email y mensaje son obligatorios", true);
+      }
+      try {
+        await api("/api/admin/leads", {
+          method: "POST",
+          body: JSON.stringify({
+            name,
+            company: document.getElementById("lCompany").value,
+            email,
+            phone: document.getElementById("lPhone").value,
+            service: document.getElementById("lService").value,
+            status: document.getElementById("lStatus").value,
+            message,
+            notes: document.getElementById("lNotes").value,
+            source: "manual",
+          }),
+        });
+        toast("Lead creado");
+        closeModal();
+        loadLeads();
+        loadDashboard();
+      } catch (e) {
+        toast(e.message, true);
+      }
+    });
+  });
+
   // ----- Clients -----
   async function loadClients() {
     const { clients } = await api("/api/admin/clients");

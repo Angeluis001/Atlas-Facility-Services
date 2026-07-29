@@ -3,6 +3,16 @@ import { requireAdmin } from "../../lib/auth.js";
 import { json, readBody, sanitize, methodNotAllowed } from "../../lib/http.js";
 
 const STATUSES = new Set(["nuevo", "contactado", "calificado", "descartado", "convertido"]);
+const SERVICES = new Set([
+  "hvac",
+  "electrico",
+  "plomeria",
+  "pintura",
+  "mantenimiento",
+  "seguridad",
+  "varios",
+  "",
+]);
 
 export default async function handler(req, res) {
   const user = await requireAdmin(req, res);
@@ -11,6 +21,52 @@ export default async function handler(req, res) {
   const sql = getSql();
 
   try {
+    if (req.method === "POST") {
+      const body = readBody(req);
+      const name = sanitize(body.name, 120);
+      const company = sanitize(body.company, 160);
+      const email = sanitize(body.email, 200).toLowerCase();
+      const phone = sanitize(body.phone, 40);
+      const service = sanitize(body.service, 40).toLowerCase();
+      const message = sanitize(body.message, 4000);
+      const notes = sanitize(body.notes, 4000);
+      const status = sanitize(body.status, 40) || "nuevo";
+      const source = sanitize(body.source, 40) || "manual";
+
+      if (!name || !email || !message) {
+        return json(res, 400, {
+          ok: false,
+          error: "Nombre, email y mensaje son obligatorios",
+        });
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return json(res, 400, { ok: false, error: "Email no válido" });
+      }
+      if (!SERVICES.has(service)) {
+        return json(res, 400, { ok: false, error: "Servicio no válido" });
+      }
+      if (!STATUSES.has(status)) {
+        return json(res, 400, { ok: false, error: "Estado no válido" });
+      }
+
+      const rows = await sql`
+        INSERT INTO leads (name, company, email, phone, service, message, notes, source, status)
+        VALUES (
+          ${name},
+          ${company || null},
+          ${email},
+          ${phone || null},
+          ${service || null},
+          ${message},
+          ${notes || null},
+          ${source},
+          ${status}
+        )
+        RETURNING *
+      `;
+      return json(res, 201, { ok: true, lead: rows[0] });
+    }
+
     if (req.method === "GET") {
       const url = new URL(req.url, `http://${req.headers.host}`);
       const status = url.searchParams.get("status") || "";
@@ -91,7 +147,7 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true });
     }
 
-    return methodNotAllowed(res, "GET, PATCH, DELETE");
+    return methodNotAllowed(res, "GET, POST, PATCH, DELETE");
   } catch (err) {
     console.error("[admin/leads]", err);
     return json(res, 500, { ok: false, error: "Error en leads" });
