@@ -915,54 +915,413 @@
 
   function printQuote(q) {
     const items = Array.isArray(q.line_items) ? q.line_items : [];
+    const logoUrl = `${window.location.origin}/assets/logo.png`;
+    const quoteId = String(q.id || "").slice(0, 8).toUpperCase();
+    const serviceName = serviceLabels[q.service_type] || q.service_type || "Servicios integrales";
     const rows = items
       .map(
-        (it) =>
-          `<tr><td>${esc(it.description)}</td><td>${esc(it.quantity)}</td><td>${esc(it.unit)}</td><td>${money(it.unit_price_cents)}</td><td>${money(it.total_cents ?? Math.round(it.quantity * it.unit_price_cents))}</td></tr>`
+        (it, i) => `
+        <tr class="${i % 2 ? "alt" : ""}">
+          <td class="col-desc">${esc(it.description)}</td>
+          <td class="num">${esc(it.quantity)}</td>
+          <td class="num">${esc(it.unit)}</td>
+          <td class="num">${money(it.unit_price_cents)}</td>
+          <td class="num strong">${money(
+            it.total_cents ?? Math.round(Number(it.quantity) * Number(it.unit_price_cents))
+          )}</td>
+        </tr>`
       )
       .join("");
+
     const w = window.open("", "_blank");
     if (!w) {
       toast("Permite ventanas emergentes para imprimir", true);
       return;
     }
-    w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><title>${esc(q.title)}</title>
-      <style>
-        body{font-family:Segoe UI,system-ui,sans-serif;color:#0b1d3a;padding:32px;max-width:800px;margin:auto}
-        h1{font-size:1.4rem;margin:0 0 4px} h2{font-size:1.1rem;color:#1e4d8c;margin:0 0 16px}
-        .meta{color:#555;font-size:.9rem;margin-bottom:20px}
-        table{width:100%;border-collapse:collapse;margin:16px 0}
-        th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left;font-size:.9rem}
-        th{background:#f3f6fb;font-size:.75rem;text-transform:uppercase}
-        .tot{text-align:right;margin-top:12px;line-height:1.7}
-        .notes{margin-top:20px;font-size:.88rem;color:#333;white-space:pre-wrap}
-        .brand{font-size:.8rem;color:#666;margin-bottom:24px}
-        @media print{body{padding:0}}
-      </style></head><body>
-      <div class="brand">ATLAS Facility Services · Cabo San Lucas / San José del Cabo · Soluciones integrales. Resultados confiables.</div>
+
+    w.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>${esc(q.title)} · Atlas</title>
+  <style>
+    @page { size: letter; margin: 14mm 12mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: #0b1d3a;
+      background: #fff;
+      font-size: 11.5px;
+      line-height: 1.45;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .page { max-width: 800px; margin: 0 auto; padding: 8px 4px 24px; }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 16px;
+      border-bottom: 3px solid #123056;
+    }
+    .brand-block { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .logo {
+      width: 78px; height: 78px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .brand-text strong {
+      display: block;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      color: #0b1d3a;
+      line-height: 1.1;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .brand-text em {
+      display: block;
+      font-style: normal;
+      font-size: 10px;
+      color: #1e4d8c;
+      margin-top: 6px;
+      max-width: 280px;
+    }
+    .doc-meta {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .doc-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #0b1d3a, #1e4d8c);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .doc-meta .ref { font-size: 11px; color: #475569; }
+    .doc-meta .ref strong { color: #0b1d3a; }
+
+    /* Title band */
+    .title-band {
+      margin: 18px 0 14px;
+      padding: 14px 16px;
+      background: linear-gradient(90deg, #f0f6ff 0%, #fff 70%);
+      border-left: 4px solid #2563eb;
+      border-radius: 0 8px 8px 0;
+    }
+    .title-band h1 {
+      margin: 0 0 4px;
+      font-size: 17px;
+      color: #0b1d3a;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .title-band p {
+      margin: 0;
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    /* Info grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fafbfc;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1e4d8c;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+    .card .row { margin: 3px 0; color: #334155; }
+    .card .row b { color: #0b1d3a; font-weight: 600; }
+    .scope {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .scope h3 {
+      margin: 0 0 6px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1e4d8c;
+    }
+    .scope p { margin: 0; color: #334155; white-space: pre-wrap; }
+
+    /* Table */
+    table.items {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 4px 0 8px;
+      font-size: 11px;
+    }
+    table.items thead th {
+      background: #0b1d3a;
+      color: #fff;
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 9px 10px;
+      text-align: left;
+    }
+    table.items thead th.num { text-align: right; }
+    table.items tbody td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #e8eef5;
+      vertical-align: top;
+      color: #1e293b;
+    }
+    table.items tbody tr.alt td { background: #f8fafc; }
+    table.items .col-desc { width: 48%; }
+    table.items .num { text-align: right; white-space: nowrap; }
+    table.items .strong { font-weight: 600; color: #0b1d3a; }
+
+    /* Totals */
+    .totals-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin: 8px 0 18px;
+    }
+    .totals {
+      width: 260px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .totals .line {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      color: #475569;
+      border-bottom: 1px solid #eef2f7;
+    }
+    .totals .line.grand {
+      background: #0b1d3a;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      border-bottom: none;
+      padding: 11px 12px;
+    }
+
+    /* Notes */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .note-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    .note-box.full { grid-column: 1 / -1; }
+    .note-box h4 {
+      margin: 0 0 6px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1e4d8c;
+    }
+    .note-box p {
+      margin: 0;
+      color: #475569;
+      white-space: pre-wrap;
+      font-size: 11px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 2px solid #123056;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+    }
+    .footer .contact {
+      font-size: 10.5px;
+      color: #475569;
+      line-height: 1.55;
+    }
+    .footer .contact strong {
+      display: block;
+      color: #0b1d3a;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+    .footer .tagline {
+      text-align: right;
+      font-size: 10px;
+      color: #64748b;
+      max-width: 240px;
+    }
+    .footer .services {
+      margin-top: 4px;
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    @media print {
+      body { padding: 0; }
+      .page { padding: 0; max-width: none; }
+    }
+    @media (max-width: 640px) {
+      .info-grid, .notes-grid { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .doc-meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="brand-block">
+        <img class="logo" src="${logoUrl}" alt="Atlas Facility Services" width="78" height="78" />
+        <div class="brand-text">
+          <strong>ATLAS</strong>
+          <span>Facility Services</span>
+          <em>HVAC · Eléctrico · Plomería · Pintura · Mantenimiento · Seguridad</em>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <div class="doc-badge">Cotización</div>
+        <div class="ref"><strong>Folio:</strong> ATL-${esc(quoteId)}</div>
+        <div class="ref"><strong>Fecha:</strong> ${fmtDay(q.created_at)}</div>
+        <div class="ref"><strong>Vigencia:</strong> ${fmtDay(q.valid_until)}</div>
+      </div>
+    </header>
+
+    <div class="title-band">
       <h1>${esc(q.title)}</h1>
-      <h2>Cotización</h2>
-      <div class="meta">
-        <div><strong>Cliente:</strong> ${esc(q.client_name)}${q.client_company ? " — " + esc(q.client_company) : ""}</div>
-        ${q.client_email || q.client_phone ? `<div>${esc(q.client_email || "")} ${esc(q.client_phone || "")}</div>` : ""}
-        <div><strong>Servicio:</strong> ${esc(serviceLabels[q.service_type] || q.service_type || "—")}</div>
-        <div><strong>Fecha:</strong> ${fmtDay(q.created_at)} · <strong>Vigencia:</strong> ${fmtDay(q.valid_until)}</div>
-        <div><strong>Estado:</strong> ${esc(q.status)}</div>
+      <p>Propuesta de servicios profesionales · ${esc(serviceName)}</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="card">
+        <h3>Cliente</h3>
+        <div class="row"><b>${esc(q.client_name)}</b></div>
+        ${q.client_company ? `<div class="row">${esc(q.client_company)}</div>` : ""}
+        ${q.client_email ? `<div class="row">${esc(q.client_email)}</div>` : ""}
+        ${q.client_phone ? `<div class="row">${esc(q.client_phone)}</div>` : ""}
+        ${q.client_address ? `<div class="row">${esc(q.client_address)}</div>` : ""}
       </div>
-      <p><strong>Alcance:</strong> ${esc(q.job_description)}</p>
-      <table><thead><tr><th>Descripción</th><th>Cant.</th><th>Unidad</th><th>P. unit.</th><th>Total</th></tr></thead>
-      <tbody>${rows}</tbody></table>
-      <div class="tot">
-        <div>Subtotal: ${money(q.subtotal_cents)}</div>
-        <div>IVA: ${money(q.tax_cents)}</div>
-        <div><strong>Total: ${money(q.total_cents)} ${esc(q.currency || "MXN")}</strong></div>
+      <div class="card">
+        <h3>Detalle del documento</h3>
+        <div class="row"><b>Servicio:</b> ${esc(serviceName)}</div>
+        <div class="row"><b>Moneda:</b> ${esc(q.currency || "MXN")}</div>
+        <div class="row"><b>Estado:</b> ${esc(q.status || "borrador")}</div>
+        <div class="row"><b>Zona:</b> Cabo San Lucas / San José del Cabo, BCS</div>
       </div>
-      ${q.labor_notes ? `<div class="notes"><strong>Mano de obra:</strong>\n${esc(q.labor_notes)}</div>` : ""}
-      ${q.materials_notes ? `<div class="notes"><strong>Materiales:</strong>\n${esc(q.materials_notes)}</div>` : ""}
-      ${q.conditions ? `<div class="notes"><strong>Condiciones:</strong>\n${esc(q.conditions)}</div>` : ""}
-      <div class="notes" style="margin-top:32px">Contacto: angeluis012@hotmail.com · +52 624 100 0381</div>
-      <script>window.onload=()=>window.print()<\/script>
-      </body></html>`);
+    </div>
+
+    ${
+      q.job_description
+        ? `<div class="scope"><h3>Alcance del trabajo</h3><p>${esc(q.job_description)}</p></div>`
+        : ""
+    }
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th>Descripción</th>
+          <th class="num">Cant.</th>
+          <th class="num">Unidad</th>
+          <th class="num">P. unitario</th>
+          <th class="num">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows || `<tr><td colspan="5">Sin partidas</td></tr>`}
+      </tbody>
+    </table>
+
+    <div class="totals-wrap">
+      <div class="totals">
+        <div class="line"><span>Subtotal</span><span>${money(q.subtotal_cents)}</span></div>
+        <div class="line"><span>IVA (16%)</span><span>${money(q.tax_cents)}</span></div>
+        <div class="line grand"><span>Total</span><span>${money(q.total_cents)} ${esc(q.currency || "MXN")}</span></div>
+      </div>
+    </div>
+
+    <div class="notes-grid">
+      ${
+        q.labor_notes
+          ? `<div class="note-box"><h4>Mano de obra</h4><p>${esc(q.labor_notes)}</p></div>`
+          : ""
+      }
+      ${
+        q.materials_notes
+          ? `<div class="note-box"><h4>Materiales</h4><p>${esc(q.materials_notes)}</p></div>`
+          : ""
+      }
+      ${
+        q.conditions
+          ? `<div class="note-box full"><h4>Condiciones comerciales</h4><p>${esc(q.conditions)}</p></div>`
+          : ""
+      }
+    </div>
+
+    <footer class="footer">
+      <div class="contact">
+        <strong>Atlas Facility Services</strong>
+        angeluis012@hotmail.com<br />
+        +52 624 100 0381<br />
+        Baja California Sur · Los Cabos
+      </div>
+      <div class="tagline">
+        Soluciones integrales.<br />Resultados confiables.
+        <div class="services">Documento generado por el sistema Atlas Admin</div>
+      </div>
+    </footer>
+  </div>
+  <script>
+    window.onload = function () {
+      var img = document.querySelector('.logo');
+      function go() { setTimeout(function(){ window.print(); }, 150); }
+      if (img && !img.complete) { img.onload = go; img.onerror = go; }
+      else go();
+    };
+  <\/script>
+</body>
+</html>`);
     w.document.close();
   }
 
