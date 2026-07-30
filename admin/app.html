@@ -25,6 +25,7 @@
       <button type="button" class="nav-item" data-view="leads">Leads <span class="badge" id="badgeLeads" hidden>0</span></button>
       <button type="button" class="nav-item" data-view="clients">Clientes</button>
       <button type="button" class="nav-item" data-view="projects">Proyectos</button>
+      <button type="button" class="nav-item" data-view="quotes">Cotizaciones</button>
       <button type="button" class="nav-item" data-view="finance">Finanzas</button>
     </nav>
     <div class="sidebar-foot">
@@ -129,6 +130,134 @@
               </tr>
             </thead>
             <tbody id="projectsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Quotes -->
+      <section class="view" id="view-quotes">
+        <div class="toolbar">
+          <button type="button" class="btn-primary" id="newQuoteBtn">+ Nueva cotización</button>
+          <button type="button" class="btn-ghost" id="refreshQuotes">Actualizar</button>
+        </div>
+
+        <div class="quote-workspace" id="quoteWorkspace" hidden>
+          <div class="panel quote-form-panel">
+            <div class="panel-head">
+              <h3 id="quoteFormTitle">Nueva cotización</h3>
+              <button type="button" class="btn-text" id="closeQuoteForm">Cerrar</button>
+            </div>
+            <div class="quote-form">
+              <div class="quote-grid">
+                <label>Cliente *
+                  <input id="qClientName" placeholder="Nombre del cliente" />
+                </label>
+                <label>Empresa
+                  <input id="qClientCompany" placeholder="Empresa / hotel / negocio" />
+                </label>
+                <label>Email
+                  <input id="qClientEmail" type="email" />
+                </label>
+                <label>Teléfono
+                  <input id="qClientPhone" type="tel" />
+                </label>
+                <label>Ubicación
+                  <input id="qLocation" value="Cabo San Lucas / San José del Cabo, BCS" />
+                </label>
+                <label>Servicio
+                  <select id="qService">
+                    <option value="">— Inferir con IA —</option>
+                    <option value="hvac">HVAC</option>
+                    <option value="electrico">Eléctrico</option>
+                    <option value="plomeria">Plomería</option>
+                    <option value="pintura">Pintura</option>
+                    <option value="mantenimiento">Mantenimiento general</option>
+                    <option value="seguridad">Seguridad electrónica</option>
+                    <option value="varios">Varios / integral</option>
+                  </select>
+                </label>
+              </div>
+              <label>Descripción del trabajo *
+                <textarea id="qJob" rows="4" placeholder="Ej: Instalación de 2 mini-splits 1.5 ton en oficina, incluye tubería, vacío, arranque y prueba. Edificio en CSL…"></textarea>
+              </label>
+              <label>Contexto extra para la IA (opcional)
+                <textarea id="qExtra" rows="2" placeholder="Urgencia, marca de equipos, si ya visitaste el sitio, descuentos, etc."></textarea>
+              </label>
+              <div class="quote-actions-row">
+                <button type="button" class="btn-primary" id="generateQuoteAi">✨ Generar con IA</button>
+                <span class="cell-sub" id="quoteAiStatus"></span>
+              </div>
+
+              <label>Título de la cotización
+                <input id="qTitle" placeholder="Se llena con IA o escríbelo tú" />
+              </label>
+
+              <div class="panel-head sub">
+                <h3>Partidas</h3>
+                <button type="button" class="btn-sm" id="addQuoteLine">+ Partida</button>
+              </div>
+              <div class="table-wrap">
+                <table class="quote-lines-table">
+                  <thead>
+                    <tr>
+                      <th>Descripción</th>
+                      <th>Cant.</th>
+                      <th>Unidad</th>
+                      <th>P. unit. MXN</th>
+                      <th>Total</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="quoteLinesBody"></tbody>
+                </table>
+              </div>
+
+              <div class="quote-totals" id="quoteTotals"></div>
+
+              <div class="quote-grid">
+                <label>Notas de mano de obra
+                  <textarea id="qLabor" rows="2"></textarea>
+                </label>
+                <label>Notas de materiales
+                  <textarea id="qMaterials" rows="2"></textarea>
+                </label>
+              </div>
+              <label>Condiciones
+                <textarea id="qConditions" rows="3"></textarea>
+              </label>
+              <label>Estado
+                <select id="qStatus">
+                  <option value="borrador">borrador</option>
+                  <option value="enviada">enviada</option>
+                  <option value="aceptada">aceptada</option>
+                  <option value="rechazada">rechazada</option>
+                </select>
+              </label>
+
+              <div class="quote-actions-row end">
+                <button type="button" class="btn-ghost" id="cancelQuoteForm">Cancelar</button>
+                <button type="button" class="btn-primary" id="saveQuoteBtn">Guardar cotización</button>
+              </div>
+              <input type="hidden" id="qEditId" value="" />
+              <input type="hidden" id="qAiModel" value="" />
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap panel" id="quotesListPanel">
+          <table>
+            <thead>
+              <tr>
+                <th>Cotización</th>
+                <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="quotesBody"></tbody>
           </table>
         </div>
       </section>

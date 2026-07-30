@@ -621,6 +621,116 @@ tr:hover td { background: rgba(59, 130, 246, 0.04); }
 .toast[hidden] { display: none; }
 .toast.error { border-color: rgba(248, 113, 113, 0.5); color: #fecaca; }
 
+/* ----- Cotizaciones ----- */
+.quote-workspace {
+  margin-bottom: 20px;
+}
+
+.quote-form-panel .quote-form {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quote-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quote-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.quote-form input,
+.quote-form select,
+.quote-form textarea,
+.quote-lines-table input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(5, 10, 20, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  color: var(--text);
+  color-scheme: dark;
+}
+
+.quote-form input:focus,
+.quote-form select:focus,
+.quote-form textarea:focus,
+.quote-lines-table input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.quote-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quote-actions-row.end {
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.panel-head.sub {
+  padding: 0;
+  border: none;
+  margin-top: 4px;
+}
+
+.quote-totals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 12px 4px;
+  font-size: 0.95rem;
+}
+
+.quote-totals div {
+  display: flex;
+  gap: 24px;
+  min-width: 220px;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.quote-totals .grand {
+  color: var(--text);
+  font-size: 1.1rem;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.quote-lines-table th:nth-child(2),
+.quote-lines-table td:nth-child(2),
+.quote-lines-table th:nth-child(3),
+.quote-lines-table td:nth-child(3),
+.quote-lines-table th:nth-child(4),
+.quote-lines-table td:nth-child(4),
+.quote-lines-table th:nth-child(5),
+.quote-lines-table td:nth-child(5) {
+  white-space: nowrap;
+}
+
+.pill.borrador { background: rgba(148, 163, 184, 0.15); color: var(--muted); }
+.pill.enviada { background: rgba(56, 189, 248, 0.15); color: var(--cyan); }
+.pill.aceptada { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+.pill.rechazada, .pill.vencida { background: rgba(248, 113, 113, 0.12); color: var(--red); }
+
+@media (max-width: 800px) {
+  .quote-grid { grid-template-columns: 1fr; }
+}
+
 /* Selects en tablas (Estado leads / proyectos) — contraste en tema oscuro */
 table select,
 .lead-status,

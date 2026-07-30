@@ -7,6 +7,7 @@
     leads: "Leads / Contactos",
     clients: "Clientes",
     projects: "Proyectos",
+    quotes: "Cotizaciones",
     finance: "Finanzas",
   };
 
@@ -134,6 +135,7 @@
     if (name === "leads") loadLeads();
     if (name === "clients") loadClients();
     if (name === "projects") loadProjects();
+    if (name === "quotes") loadQuotes();
     if (name === "finance") loadFinance();
   }
 
@@ -609,6 +611,385 @@
         toast(e.message, true);
       }
     });
+  });
+
+  // ----- Quotes -----
+  let quoteLines = [];
+
+  function pesosFromCents(cents) {
+    return (Number(cents || 0) / 100).toFixed(2);
+  }
+
+  function renderQuoteLines() {
+    const tbody = document.getElementById("quoteLinesBody");
+    if (!tbody) return;
+    if (!quoteLines.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty">Sin partidas. Genera con IA o agrega manualmente.</td></tr>`;
+      updateQuoteTotals();
+      return;
+    }
+    tbody.innerHTML = quoteLines
+      .map(
+        (line, i) => `
+      <tr data-i="${i}">
+        <td><input class="ql-desc" data-i="${i}" value="${esc(line.description)}" /></td>
+        <td><input class="ql-qty" data-i="${i}" type="number" min="0" step="0.01" value="${esc(line.quantity)}" style="width:70px" /></td>
+        <td><input class="ql-unit" data-i="${i}" value="${esc(line.unit || "servicio")}" style="width:80px" /></td>
+        <td><input class="ql-price" data-i="${i}" type="number" min="0" step="0.01" value="${pesosFromCents(line.unit_price_cents)}" style="width:100px" /></td>
+        <td class="cell-sub">${money(Math.round((Number(line.quantity) || 0) * (Number(line.unit_price_cents) || 0)))}</td>
+        <td><button type="button" class="btn-sm danger ql-del" data-i="${i}">×</button></td>
+      </tr>`
+      )
+      .join("");
+
+    tbody.querySelectorAll(".ql-desc").forEach((el) => {
+      el.addEventListener("input", () => {
+        quoteLines[el.dataset.i].description = el.value;
+      });
+    });
+    tbody.querySelectorAll(".ql-qty").forEach((el) => {
+      el.addEventListener("input", () => {
+        quoteLines[el.dataset.i].quantity = Number(el.value) || 0;
+        renderQuoteLines();
+      });
+    });
+    tbody.querySelectorAll(".ql-unit").forEach((el) => {
+      el.addEventListener("input", () => {
+        quoteLines[el.dataset.i].unit = el.value;
+      });
+    });
+    tbody.querySelectorAll(".ql-price").forEach((el) => {
+      el.addEventListener("change", () => {
+        quoteLines[el.dataset.i].unit_price_cents = Math.round((Number(el.value) || 0) * 100);
+        renderQuoteLines();
+      });
+    });
+    tbody.querySelectorAll(".ql-del").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        quoteLines.splice(Number(btn.dataset.i), 1);
+        renderQuoteLines();
+      });
+    });
+    updateQuoteTotals();
+  }
+
+  function updateQuoteTotals() {
+    const subtotal = quoteLines.reduce(
+      (s, l) => s + Math.round((Number(l.quantity) || 0) * (Number(l.unit_price_cents) || 0)),
+      0
+    );
+    const tax = Math.round(subtotal * 0.16);
+    const total = subtotal + tax;
+    const el = document.getElementById("quoteTotals");
+    if (el) {
+      el.innerHTML = `
+        <div><span>Subtotal</span><strong>${money(subtotal)}</strong></div>
+        <div><span>IVA (16%)</span><strong>${money(tax)}</strong></div>
+        <div class="grand"><span>Total</span><strong>${money(total)}</strong></div>
+      `;
+    }
+    return { subtotal, tax, total };
+  }
+
+  function showQuoteWorkspace(show) {
+    document.getElementById("quoteWorkspace").hidden = !show;
+    document.getElementById("quotesListPanel").hidden = show;
+  }
+
+  function resetQuoteForm() {
+    document.getElementById("qEditId").value = "";
+    document.getElementById("qAiModel").value = "";
+    document.getElementById("qClientName").value = "";
+    document.getElementById("qClientCompany").value = "";
+    document.getElementById("qClientEmail").value = "";
+    document.getElementById("qClientPhone").value = "";
+    document.getElementById("qLocation").value = "Cabo San Lucas / San José del Cabo, BCS";
+    document.getElementById("qService").value = "";
+    document.getElementById("qJob").value = "";
+    document.getElementById("qExtra").value = "";
+    document.getElementById("qTitle").value = "";
+    document.getElementById("qLabor").value = "";
+    document.getElementById("qMaterials").value = "";
+    document.getElementById("qConditions").value = "";
+    document.getElementById("qStatus").value = "borrador";
+    document.getElementById("quoteAiStatus").textContent = "";
+    document.getElementById("quoteFormTitle").textContent = "Nueva cotización";
+    quoteLines = [];
+    renderQuoteLines();
+  }
+
+  async function loadQuotes() {
+    const { quotes } = await api("/api/admin/quotes");
+    const tbody = document.getElementById("quotesBody");
+    if (!quotes.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty">Aún no hay cotizaciones. Crea una con IA o manualmente.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = quotes
+      .map(
+        (q) => `
+      <tr>
+        <td>
+          <div class="cell-title">${esc(q.title)}</div>
+        </td>
+        <td>
+          <div class="cell-title">${esc(q.client_name)}</div>
+          <div class="cell-sub">${esc(q.client_company || "")}</div>
+        </td>
+        <td>${esc(serviceLabels[q.service_type] || q.service_type || "—")}</td>
+        <td>${money(q.total_cents)}</td>
+        <td>${pill(q.status)}</td>
+        <td class="cell-sub">${fmtDate(q.created_at)}</td>
+        <td class="actions">
+          <button type="button" class="btn-sm edit-quote" data-id="${esc(q.id)}">Editar</button>
+          <button type="button" class="btn-sm print-quote" data-id="${esc(q.id)}">Imprimir</button>
+          <button type="button" class="btn-sm danger del-quote" data-id="${esc(q.id)}">Borrar</button>
+        </td>
+      </tr>`
+      )
+      .join("");
+
+    tbody.querySelectorAll(".edit-quote").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        try {
+          const { quote } = await api(`/api/admin/quotes?id=${encodeURIComponent(btn.dataset.id)}`);
+          openQuoteEditor(quote);
+        } catch (e) {
+          toast(e.message, true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll(".print-quote").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        try {
+          const { quote } = await api(`/api/admin/quotes?id=${encodeURIComponent(btn.dataset.id)}`);
+          printQuote(quote);
+        } catch (e) {
+          toast(e.message, true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll(".del-quote").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("¿Eliminar esta cotización?")) return;
+        try {
+          await api("/api/admin/quotes", {
+            method: "DELETE",
+            body: JSON.stringify({ id: btn.dataset.id }),
+          });
+          toast("Cotización eliminada");
+          loadQuotes();
+        } catch (e) {
+          toast(e.message, true);
+        }
+      });
+    });
+  }
+
+  function openQuoteEditor(quote) {
+    showQuoteWorkspace(true);
+    document.getElementById("quoteFormTitle").textContent = "Editar cotización";
+    document.getElementById("qEditId").value = quote.id;
+    document.getElementById("qAiModel").value = quote.ai_model || "";
+    document.getElementById("qClientName").value = quote.client_name || "";
+    document.getElementById("qClientCompany").value = quote.client_company || "";
+    document.getElementById("qClientEmail").value = quote.client_email || "";
+    document.getElementById("qClientPhone").value = quote.client_phone || "";
+    document.getElementById("qService").value = quote.service_type || "";
+    document.getElementById("qJob").value = quote.job_description || "";
+    document.getElementById("qTitle").value = quote.title || "";
+    document.getElementById("qLabor").value = quote.labor_notes || "";
+    document.getElementById("qMaterials").value = quote.materials_notes || "";
+    document.getElementById("qConditions").value = quote.conditions || "";
+    document.getElementById("qStatus").value = quote.status || "borrador";
+    const items = Array.isArray(quote.line_items) ? quote.line_items : [];
+    quoteLines = items.map((it) => ({
+      description: it.description || "",
+      quantity: Number(it.quantity) || 1,
+      unit: it.unit || "servicio",
+      unit_price_cents: Number(it.unit_price_cents) || 0,
+    }));
+    renderQuoteLines();
+  }
+
+  function printQuote(q) {
+    const items = Array.isArray(q.line_items) ? q.line_items : [];
+    const rows = items
+      .map(
+        (it) =>
+          `<tr><td>${esc(it.description)}</td><td>${esc(it.quantity)}</td><td>${esc(it.unit)}</td><td>${money(it.unit_price_cents)}</td><td>${money(it.total_cents ?? Math.round(it.quantity * it.unit_price_cents))}</td></tr>`
+      )
+      .join("");
+    const w = window.open("", "_blank");
+    if (!w) {
+      toast("Permite ventanas emergentes para imprimir", true);
+      return;
+    }
+    w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><title>${esc(q.title)}</title>
+      <style>
+        body{font-family:Segoe UI,system-ui,sans-serif;color:#0b1d3a;padding:32px;max-width:800px;margin:auto}
+        h1{font-size:1.4rem;margin:0 0 4px} h2{font-size:1.1rem;color:#1e4d8c;margin:0 0 16px}
+        .meta{color:#555;font-size:.9rem;margin-bottom:20px}
+        table{width:100%;border-collapse:collapse;margin:16px 0}
+        th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left;font-size:.9rem}
+        th{background:#f3f6fb;font-size:.75rem;text-transform:uppercase}
+        .tot{text-align:right;margin-top:12px;line-height:1.7}
+        .notes{margin-top:20px;font-size:.88rem;color:#333;white-space:pre-wrap}
+        .brand{font-size:.8rem;color:#666;margin-bottom:24px}
+        @media print{body{padding:0}}
+      </style></head><body>
+      <div class="brand">ATLAS Facility Services · Cabo San Lucas / San José del Cabo · Soluciones integrales. Resultados confiables.</div>
+      <h1>${esc(q.title)}</h1>
+      <h2>Cotización</h2>
+      <div class="meta">
+        <div><strong>Cliente:</strong> ${esc(q.client_name)}${q.client_company ? " — " + esc(q.client_company) : ""}</div>
+        ${q.client_email || q.client_phone ? `<div>${esc(q.client_email || "")} ${esc(q.client_phone || "")}</div>` : ""}
+        <div><strong>Servicio:</strong> ${esc(serviceLabels[q.service_type] || q.service_type || "—")}</div>
+        <div><strong>Fecha:</strong> ${fmtDay(q.created_at)} · <strong>Vigencia:</strong> ${fmtDay(q.valid_until)}</div>
+        <div><strong>Estado:</strong> ${esc(q.status)}</div>
+      </div>
+      <p><strong>Alcance:</strong> ${esc(q.job_description)}</p>
+      <table><thead><tr><th>Descripción</th><th>Cant.</th><th>Unidad</th><th>P. unit.</th><th>Total</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <div class="tot">
+        <div>Subtotal: ${money(q.subtotal_cents)}</div>
+        <div>IVA: ${money(q.tax_cents)}</div>
+        <div><strong>Total: ${money(q.total_cents)} ${esc(q.currency || "MXN")}</strong></div>
+      </div>
+      ${q.labor_notes ? `<div class="notes"><strong>Mano de obra:</strong>\n${esc(q.labor_notes)}</div>` : ""}
+      ${q.materials_notes ? `<div class="notes"><strong>Materiales:</strong>\n${esc(q.materials_notes)}</div>` : ""}
+      ${q.conditions ? `<div class="notes"><strong>Condiciones:</strong>\n${esc(q.conditions)}</div>` : ""}
+      <div class="notes" style="margin-top:32px">Contacto: angeluis012@hotmail.com · +52 624 100 0381</div>
+      <script>window.onload=()=>window.print()<\/script>
+      </body></html>`);
+    w.document.close();
+  }
+
+  document.getElementById("newQuoteBtn")?.addEventListener("click", () => {
+    resetQuoteForm();
+    showQuoteWorkspace(true);
+  });
+  document.getElementById("closeQuoteForm")?.addEventListener("click", () => showQuoteWorkspace(false));
+  document.getElementById("cancelQuoteForm")?.addEventListener("click", () => {
+    showQuoteWorkspace(false);
+    resetQuoteForm();
+  });
+  document.getElementById("refreshQuotes")?.addEventListener("click", () =>
+    loadQuotes().catch((e) => toast(e.message, true))
+  );
+  document.getElementById("addQuoteLine")?.addEventListener("click", () => {
+    quoteLines.push({
+      description: "",
+      quantity: 1,
+      unit: "servicio",
+      unit_price_cents: 0,
+    });
+    renderQuoteLines();
+  });
+
+  document.getElementById("generateQuoteAi")?.addEventListener("click", async () => {
+    const job = document.getElementById("qJob").value.trim();
+    const clientName = document.getElementById("qClientName").value.trim();
+    if (!job || job.length < 10) {
+      return toast("Describe el trabajo con más detalle", true);
+    }
+    const btn = document.getElementById("generateQuoteAi");
+    const status = document.getElementById("quoteAiStatus");
+    btn.disabled = true;
+    status.textContent = "Generando con IA…";
+    try {
+      const data = await api("/api/admin/quotes-generate", {
+        method: "POST",
+        body: JSON.stringify({
+          job_description: job,
+          client_name: clientName,
+          client_company: document.getElementById("qClientCompany").value,
+          service_type: document.getElementById("qService").value,
+          location: document.getElementById("qLocation").value,
+          extra_context: document.getElementById("qExtra").value,
+        }),
+      });
+      const d = data.draft;
+      document.getElementById("qTitle").value = d.title || "";
+      document.getElementById("qLabor").value = d.labor_notes || "";
+      document.getElementById("qMaterials").value = d.materials_notes || "";
+      document.getElementById("qConditions").value = d.conditions || "";
+      document.getElementById("qAiModel").value = d.ai_model || "";
+      if (d.service_type && !document.getElementById("qService").value) {
+        document.getElementById("qService").value = d.service_type;
+      }
+      quoteLines = (d.line_items || []).map((it) => ({
+        description: it.description,
+        quantity: Number(it.quantity) || 1,
+        unit: it.unit || "servicio",
+        unit_price_cents: Number(it.unit_price_cents) || 0,
+      }));
+      renderQuoteLines();
+      status.textContent = "Listo. Revisa y ajusta las partidas.";
+      toast("Cotización generada con IA");
+    } catch (e) {
+      status.textContent = "";
+      toast(e.message, true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById("saveQuoteBtn")?.addEventListener("click", async () => {
+    const clientName = document.getElementById("qClientName").value.trim();
+    const title = document.getElementById("qTitle").value.trim();
+    const job = document.getElementById("qJob").value.trim();
+    if (!clientName || !title || !job) {
+      return toast("Cliente, título y descripción son obligatorios", true);
+    }
+    if (!quoteLines.length) {
+      return toast("Agrega al menos una partida", true);
+    }
+    const payload = {
+      client_name: clientName,
+      client_company: document.getElementById("qClientCompany").value,
+      client_email: document.getElementById("qClientEmail").value,
+      client_phone: document.getElementById("qClientPhone").value,
+      service_type: document.getElementById("qService").value,
+      title,
+      job_description: job,
+      line_items: quoteLines.map((l) => ({
+        description: l.description,
+        quantity: l.quantity,
+        unit: l.unit,
+        unit_price_cents: l.unit_price_cents,
+        total_cents: Math.round((Number(l.quantity) || 0) * (Number(l.unit_price_cents) || 0)),
+      })),
+      labor_notes: document.getElementById("qLabor").value,
+      materials_notes: document.getElementById("qMaterials").value,
+      conditions: document.getElementById("qConditions").value,
+      status: document.getElementById("qStatus").value,
+      ai_model: document.getElementById("qAiModel").value || null,
+      tax_rate: 0.16,
+    };
+    const editId = document.getElementById("qEditId").value;
+    try {
+      if (editId) {
+        await api("/api/admin/quotes", {
+          method: "PATCH",
+          body: JSON.stringify({ id: editId, ...payload }),
+        });
+        toast("Cotización actualizada");
+      } else {
+        await api("/api/admin/quotes", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        toast("Cotización guardada");
+      }
+      showQuoteWorkspace(false);
+      resetQuoteForm();
+      loadQuotes();
+    } catch (e) {
+      toast(e.message, true);
+    }
   });
 
   // ----- Finance -----

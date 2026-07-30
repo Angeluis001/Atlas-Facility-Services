@@ -71,14 +71,27 @@ Abre la URL que indique la CLI (el formulario llama a `/api/leads`).
 Cada envío válido del formulario inserta un registro en `leads` con `status = 'nuevo'`.  
 Esos leads alimentarán el **panel de administración** (seguimiento de clientes, proyectos, finanzas).
 
-## Roadmap del panel (solo admin)
+## Panel admin
 
-- [ ] Login privado (solo dueño)
-- [ ] Lista de leads del formulario + cambio de status
-- [ ] Clientes y conversión lead → cliente
-- [ ] Proyectos por cliente
-- [ ] Finanzas (ingresos / egresos)
-- [ ] Administración general
+- Login privado
+- Leads (web + manual), clientes, proyectos, finanzas
+- **Cotizaciones con IA** (`/admin` → Cotizaciones): describe el trabajo → genera partidas con OpenAI → edita y guarda → imprime
+
+### Variables de entorno (Vercel)
+
+| Variable | Uso |
+|----------|-----|
+| `DATABASE_URL` | Neon |
+| `ADMIN_SESSION_SECRET` | Cookies de sesión admin |
+| `OPENAI_API_KEY` | Generación de cotizaciones |
+| `OPENAI_MODEL` | Opcional, default `gpt-4o-mini` |
+
+## Roadmap del panel
+
+- [x] Login, leads, clientes, proyectos, finanzas
+- [x] Cotizaciones con IA
+- [ ] PDF profesional / envío por email
+- [ ] Convertir cotización aceptada → proyecto + finanzas
 
 ## Seguridad
 
