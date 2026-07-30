@@ -89,7 +89,29 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true, project: rows[0] });
     }
 
-    return methodNotAllowed(res, "GET, POST, PATCH");
+    if (req.method === "DELETE") {
+      const body = readBody(req);
+      const id = sanitize(body.id, 40);
+      if (!id) return json(res, 400, { ok: false, error: "id requerido" });
+
+      const existing = await sql`
+        SELECT id, status FROM projects WHERE id = ${id} LIMIT 1
+      `;
+      if (!existing.length) {
+        return json(res, 404, { ok: false, error: "Proyecto no encontrado" });
+      }
+      if (existing[0].status !== "cancelado") {
+        return json(res, 400, {
+          ok: false,
+          error: "Solo se pueden borrar proyectos en estado cancelado",
+        });
+      }
+
+      await sql`DELETE FROM projects WHERE id = ${id}`;
+      return json(res, 200, { ok: true });
+    }
+
+    return methodNotAllowed(res, "GET, POST, PATCH, DELETE");
   } catch (err) {
     console.error("[admin/projects]", err);
     return json(res, 500, { ok: false, error: "Error en proyectos" });

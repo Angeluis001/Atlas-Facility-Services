@@ -70,7 +70,29 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true, client: rows[0] });
     }
 
-    return methodNotAllowed(res, "GET, POST, PATCH");
+    if (req.method === "DELETE") {
+      const body = readBody(req);
+      const id = sanitize(body.id, 40);
+      if (!id) return json(res, 400, { ok: false, error: "id requerido" });
+
+      const existing = await sql`SELECT id, name FROM clients WHERE id = ${id} LIMIT 1`;
+      if (!existing.length) {
+        return json(res, 404, { ok: false, error: "Cliente no encontrado" });
+      }
+
+      const [{ n }] = await sql`
+        SELECT count(*)::int AS n FROM projects WHERE client_id = ${id}
+      `;
+
+      // Projects cascade on delete (schema ON DELETE CASCADE)
+      await sql`DELETE FROM clients WHERE id = ${id}`;
+      return json(res, 200, {
+        ok: true,
+        deleted_projects: n,
+      });
+    }
+
+    return methodNotAllowed(res, "GET, POST, PATCH, DELETE");
   } catch (err) {
     console.error("[admin/clients]", err);
     return json(res, 500, { ok: false, error: "Error en clientes" });

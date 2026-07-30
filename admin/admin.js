@@ -429,12 +429,114 @@
   });
 
   // ----- Clients -----
+  function openClientModal(client = null) {
+    const isEdit = Boolean(client?.id);
+    openModal(
+      isEdit ? "Administrar cliente" : "Nuevo cliente",
+      `
+      <label>Nombre * <input id="cName" value="${esc(client?.name || "")}" required /></label>
+      <label>Empresa <input id="cCompany" value="${esc(client?.company || "")}" /></label>
+      <label>Email <input id="cEmail" type="email" value="${esc(client?.email || "")}" /></label>
+      <label>Teléfono <input id="cPhone" value="${esc(client?.phone || "")}" /></label>
+      <label>Dirección <input id="cAddress" value="${esc(client?.address || "")}" /></label>
+      <label>Ciudad <input id="cCity" value="${esc(client?.city || "Cabo San Lucas")}" /></label>
+      <label>Región <input id="cRegion" value="${esc(client?.region || "Baja California Sur")}" /></label>
+      <label>Estado
+        <select id="cStatus">
+          ${["activo", "inactivo", "prospecto"]
+            .map(
+              (s) =>
+                `<option value="${s}" ${
+                  (client?.status || "activo") === s ? "selected" : ""
+                }>${s}</option>`
+            )
+            .join("")}
+        </select>
+      </label>
+      <label>Notas <textarea id="cNotes">${esc(client?.notes || "")}</textarea></label>
+      ${
+        isEdit
+          ? `<p class="cell-sub">Proyectos vinculados: ${client.project_count ?? 0}. Al borrar el cliente se eliminan también sus proyectos.</p>`
+          : ""
+      }
+      <div class="modal-actions">
+        ${
+          isEdit
+            ? `<button type="button" class="btn-sm danger" id="deleteClientBtn">Borrar cliente</button>`
+            : ""
+        }
+        <button type="button" class="btn-ghost" data-close>Cancelar</button>
+        <button type="button" class="btn-primary" id="saveClient">${
+          isEdit ? "Guardar cambios" : "Crear cliente"
+        }</button>
+      </div>
+    `
+    );
+    modalBody.querySelector("[data-close]")?.addEventListener("click", closeModal);
+
+    document.getElementById("saveClient").addEventListener("click", async () => {
+      const name = document.getElementById("cName").value.trim();
+      if (!name) return toast("Nombre requerido", true);
+      const payload = {
+        name,
+        company: document.getElementById("cCompany").value,
+        email: document.getElementById("cEmail").value,
+        phone: document.getElementById("cPhone").value,
+        address: document.getElementById("cAddress").value,
+        city: document.getElementById("cCity").value,
+        region: document.getElementById("cRegion").value,
+        status: document.getElementById("cStatus").value,
+        notes: document.getElementById("cNotes").value,
+      };
+      try {
+        if (isEdit) {
+          await api("/api/admin/clients", {
+            method: "PATCH",
+            body: JSON.stringify({ id: client.id, ...payload }),
+          });
+          toast("Cliente actualizado");
+        } else {
+          await api("/api/admin/clients", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          toast("Cliente creado");
+        }
+        closeModal();
+        loadClients();
+      } catch (e) {
+        toast(e.message, true);
+      }
+    });
+
+    document.getElementById("deleteClientBtn")?.addEventListener("click", async () => {
+      const n = client.project_count ?? 0;
+      const msg =
+        n > 0
+          ? `¿Borrar a ${client.name}? También se eliminarán ${n} proyecto(s) vinculados.`
+          : `¿Borrar a ${client.name} de forma permanente?`;
+      if (!confirm(msg)) return;
+      try {
+        await api("/api/admin/clients", {
+          method: "DELETE",
+          body: JSON.stringify({ id: client.id }),
+        });
+        toast("Cliente eliminado");
+        closeModal();
+        loadClients();
+        cache.clients = [];
+      } catch (e) {
+        toast(e.message, true);
+      }
+    });
+  }
+
   async function loadClients() {
     const { clients } = await api("/api/admin/clients");
     cache.clients = clients;
     const tbody = document.getElementById("clientsBody");
     if (!clients.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty">Sin clientes aún. Convierte un lead o crea uno manualmente.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="empty">Sin clientes aún. Convierte un lead o crea uno manualmente.</td></tr>`;
       return;
     }
     tbody.innerHTML = clients
@@ -452,50 +554,23 @@
         <td class="cell-sub">${esc(c.city || "")}${c.region ? ", " + esc(c.region) : ""}</td>
         <td>${c.project_count ?? 0}</td>
         <td>${pill(c.status)}</td>
+        <td class="actions">
+          <button type="button" class="btn-sm manage-client" data-id="${esc(c.id)}">Administrar</button>
+        </td>
       </tr>`
       )
       .join("");
+
+    tbody.querySelectorAll(".manage-client").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const client = clients.find((x) => x.id === btn.dataset.id);
+        if (client) openClientModal(client);
+      });
+    });
   }
 
   document.getElementById("newClientBtn").addEventListener("click", () => {
-    openModal(
-      "Nuevo cliente",
-      `
-      <label>Nombre * <input id="cName" required /></label>
-      <label>Empresa <input id="cCompany" /></label>
-      <label>Email <input id="cEmail" type="email" /></label>
-      <label>Teléfono <input id="cPhone" /></label>
-      <label>Ciudad <input id="cCity" value="Cabo San Lucas" /></label>
-      <label>Notas <textarea id="cNotes"></textarea></label>
-      <div class="modal-actions">
-        <button type="button" class="btn-ghost" data-close>Cancelar</button>
-        <button type="button" class="btn-primary" id="saveClient">Guardar</button>
-      </div>
-    `
-    );
-    modalBody.querySelector("[data-close]")?.addEventListener("click", closeModal);
-    document.getElementById("saveClient").addEventListener("click", async () => {
-      const name = document.getElementById("cName").value.trim();
-      if (!name) return toast("Nombre requerido", true);
-      try {
-        await api("/api/admin/clients", {
-          method: "POST",
-          body: JSON.stringify({
-            name,
-            company: document.getElementById("cCompany").value,
-            email: document.getElementById("cEmail").value,
-            phone: document.getElementById("cPhone").value,
-            city: document.getElementById("cCity").value,
-            notes: document.getElementById("cNotes").value,
-          }),
-        });
-        toast("Cliente creado");
-        closeModal();
-        loadClients();
-      } catch (e) {
-        toast(e.message, true);
-      }
-    });
+    openClientModal(null);
   });
 
   // ----- Projects -----
@@ -511,7 +586,7 @@
 
     const tbody = document.getElementById("projectsBody");
     if (!projects.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty">Sin proyectos</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="empty">Sin proyectos</td></tr>`;
       return;
     }
     tbody.innerHTML = projects
@@ -535,6 +610,13 @@
               .join("")}
           </select>
         </td>
+        <td class="actions">
+          ${
+            p.status === "cancelado"
+              ? `<button type="button" class="btn-sm danger delete-project" data-id="${esc(p.id)}">Borrar</button>`
+              : `<span class="cell-sub">—</span>`
+          }
+        </td>
       </tr>`
       )
       .join("");
@@ -547,6 +629,23 @@
             body: JSON.stringify({ id: sel.dataset.id, status: sel.value }),
           });
           toast("Proyecto actualizado");
+          loadProjects();
+        } catch (e) {
+          toast(e.message, true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll(".delete-project").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("¿Borrar este proyecto cancelado de forma permanente?")) return;
+        try {
+          await api("/api/admin/projects", {
+            method: "DELETE",
+            body: JSON.stringify({ id: btn.dataset.id }),
+          });
+          toast("Proyecto eliminado");
+          loadProjects();
         } catch (e) {
           toast(e.message, true);
         }
