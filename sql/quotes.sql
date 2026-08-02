@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS quotes (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id       UUID REFERENCES clients (id) ON DELETE SET NULL,
+  project_id      UUID REFERENCES projects (id) ON DELETE SET NULL,
   lead_id         UUID REFERENCES leads (id) ON DELETE SET NULL,
   client_name     TEXT NOT NULL,
   client_company  TEXT,
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS quotes (
 CREATE INDEX IF NOT EXISTS quotes_status_idx ON quotes (status);
 CREATE INDEX IF NOT EXISTS quotes_created_at_idx ON quotes (created_at DESC);
 CREATE INDEX IF NOT EXISTS quotes_client_idx ON quotes (client_id);
+CREATE INDEX IF NOT EXISTS quotes_project_idx ON quotes (project_id);
 
 DROP TRIGGER IF EXISTS quotes_updated_at ON quotes;
 CREATE TRIGGER quotes_updated_at

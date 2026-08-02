@@ -82,13 +82,14 @@ export default async function handler(req, res) {
 
       const rows = await sql`
         INSERT INTO quotes (
-          client_id, lead_id, client_name, client_company, client_email, client_phone,
+          client_id, project_id, lead_id, client_name, client_company, client_email, client_phone,
           client_address, service_type, title, job_description, line_items,
           labor_notes, materials_notes, conditions, subtotal_cents, tax_rate,
           tax_cents, total_cents, currency, valid_days, valid_until, status,
           ai_model, notes
         ) VALUES (
           ${sanitize(body.client_id || body.clientId, 40) || null},
+          ${sanitize(body.project_id || body.projectId, 40) || null},
           ${sanitize(body.lead_id || body.leadId, 40) || null},
           ${clientName},
           ${sanitize(body.client_company || body.clientCompany, 160) || null},
@@ -134,8 +135,19 @@ export default async function handler(req, res) {
       const status =
         body.status && STATUSES.has(body.status) ? body.status : current.status;
 
+      const nextClientId =
+        body.client_id !== undefined || body.clientId !== undefined
+          ? sanitize(body.client_id || body.clientId, 40) || null
+          : current.client_id;
+      const nextProjectId =
+        body.project_id !== undefined || body.projectId !== undefined
+          ? sanitize(body.project_id || body.projectId, 40) || null
+          : current.project_id;
+
       const rows = await sql`
         UPDATE quotes SET
+          client_id = ${nextClientId},
+          project_id = ${nextProjectId},
           client_name = COALESCE(${body.client_name != null || body.clientName != null ? sanitize(body.client_name || body.clientName, 160) : null}, client_name),
           client_company = COALESCE(${body.client_company != null || body.clientCompany != null ? sanitize(body.client_company || body.clientCompany, 160) : null}, client_company),
           client_email = COALESCE(${body.client_email != null || body.clientEmail != null ? sanitize(body.client_email || body.clientEmail, 200).toLowerCase() : null}, client_email),

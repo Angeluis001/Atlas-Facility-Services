@@ -151,7 +151,17 @@
             </div>
             <div class="quote-form">
               <div class="quote-grid">
-                <label>Cliente *
+                <label>Cliente existente
+                  <select id="qClientSelect">
+                    <option value="">— Escribir manualmente o elegir —</option>
+                  </select>
+                </label>
+                <label>Proyecto existente
+                  <select id="qProjectSelect" disabled>
+                    <option value="">— Primero elige un cliente —</option>
+                  </select>
+                </label>
+                <label>Nombre del cliente *
                   <input id="qClientName" placeholder="Nombre del cliente" />
                 </label>
                 <label>Empresa
@@ -179,6 +189,9 @@
                   </select>
                 </label>
               </div>
+              <p class="cell-sub" id="qLinkHint" style="margin-top:-6px">
+                Al elegir cliente/proyecto se rellenan los datos. Puedes ajustar el texto después.
+              </p>
               <label>Descripción del trabajo *
                 <textarea id="qJob" rows="4" placeholder="Ej: Instalación de 2 mini-splits 1.5 ton en oficina, incluye tubería, vacío, arranque y prueba. Edificio en CSL…"></textarea>
               </label>

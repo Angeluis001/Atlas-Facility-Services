@@ -714,9 +714,117 @@
 
   // ----- Quotes -----
   let quoteLines = [];
+  let quoteClientsCache = [];
+  let quoteProjectsCache = [];
 
   function pesosFromCents(cents) {
     return (Number(cents || 0) / 100).toFixed(2);
+  }
+
+  async function ensureQuoteLookups() {
+    const [clientsRes, projectsRes] = await Promise.all([
+      api("/api/admin/clients"),
+      api("/api/admin/projects"),
+    ]);
+    quoteClientsCache = clientsRes.clients || [];
+    quoteProjectsCache = projectsRes.projects || [];
+    cache.clients = quoteClientsCache;
+    cache.projects = quoteProjectsCache;
+    fillClientSelect();
+  }
+
+  function fillClientSelect(selectedId = "") {
+    const sel = document.getElementById("qClientSelect");
+    if (!sel) return;
+    const opts = quoteClientsCache
+      .map(
+        (c) =>
+          `<option value="${esc(c.id)}" ${c.id === selectedId ? "selected" : ""}>${esc(
+            c.name
+          )}${c.company ? " — " + esc(c.company) : ""}</option>`
+      )
+      .join("");
+    sel.innerHTML =
+      `<option value="">— Escribir manualmente o elegir —</option>` + opts;
+    if (selectedId) sel.value = selectedId;
+  }
+
+  function fillProjectSelect(clientId = "", selectedProjectId = "") {
+    const sel = document.getElementById("qProjectSelect");
+    if (!sel) return;
+    if (!clientId) {
+      sel.disabled = true;
+      sel.innerHTML = `<option value="">— Primero elige un cliente —</option>`;
+      return;
+    }
+    const list = quoteProjectsCache.filter((p) => p.client_id === clientId);
+    sel.disabled = false;
+    if (!list.length) {
+      sel.innerHTML = `<option value="">— Sin proyectos para este cliente —</option>`;
+      return;
+    }
+    sel.innerHTML =
+      `<option value="">— Sin proyecto / opcional —</option>` +
+      list
+        .map(
+          (p) =>
+            `<option value="${esc(p.id)}" ${
+              p.id === selectedProjectId ? "selected" : ""
+            }>${esc(p.title)} (${esc((p.status || "").replace(/_/g, " "))})</option>`
+        )
+        .join("");
+    if (selectedProjectId) sel.value = selectedProjectId;
+  }
+
+  function applyClientToQuoteForm(client) {
+    if (!client) return;
+    document.getElementById("qClientName").value = client.name || "";
+    document.getElementById("qClientCompany").value = client.company || "";
+    document.getElementById("qClientEmail").value = client.email || "";
+    document.getElementById("qClientPhone").value = client.phone || "";
+    const loc = [client.city, client.region].filter(Boolean).join(", ");
+    if (loc) document.getElementById("qLocation").value = loc;
+  }
+
+  function applyProjectToQuoteForm(project) {
+    if (!project) return;
+    if (project.title && !document.getElementById("qTitle").value.trim()) {
+      document.getElementById("qTitle").value = `Cotización — ${project.title}`;
+    }
+    if (project.description && !document.getElementById("qJob").value.trim()) {
+      document.getElementById("qJob").value = project.description;
+    }
+    if (project.service_type) {
+      document.getElementById("qService").value = project.service_type;
+    }
+  }
+
+  function wireQuoteLookups() {
+    const clientSel = document.getElementById("qClientSelect");
+    const projectSel = document.getElementById("qProjectSelect");
+    if (!clientSel || clientSel.dataset.wired) return;
+    clientSel.dataset.wired = "1";
+
+    clientSel.addEventListener("change", () => {
+      const id = clientSel.value;
+      const client = quoteClientsCache.find((c) => c.id === id);
+      if (client) applyClientToQuoteForm(client);
+      fillProjectSelect(id, "");
+    });
+
+    projectSel?.addEventListener("change", () => {
+      const id = projectSel.value;
+      const project = quoteProjectsCache.find((p) => p.id === id);
+      if (project) {
+        applyProjectToQuoteForm(project);
+        // Asegura que el cliente del proyecto quede seleccionado
+        if (project.client_id && clientSel.value !== project.client_id) {
+          clientSel.value = project.client_id;
+          const client = quoteClientsCache.find((c) => c.id === project.client_id);
+          if (client) applyClientToQuoteForm(client);
+        }
+      }
+    });
   }
 
   function renderQuoteLines() {
@@ -813,6 +921,8 @@
     document.getElementById("qStatus").value = "borrador";
     document.getElementById("quoteAiStatus").textContent = "";
     document.getElementById("quoteFormTitle").textContent = "Nueva cotización";
+    fillClientSelect("");
+    fillProjectSelect("", "");
     quoteLines = [];
     renderQuoteLines();
   }
@@ -887,8 +997,14 @@
     });
   }
 
-  function openQuoteEditor(quote) {
+  async function openQuoteEditor(quote) {
     showQuoteWorkspace(true);
+    wireQuoteLookups();
+    try {
+      await ensureQuoteLookups();
+    } catch (e) {
+      toast(e.message, true);
+    }
     document.getElementById("quoteFormTitle").textContent = "Editar cotización";
     document.getElementById("qEditId").value = quote.id;
     document.getElementById("qAiModel").value = quote.ai_model || "";
@@ -903,6 +1019,8 @@
     document.getElementById("qMaterials").value = quote.materials_notes || "";
     document.getElementById("qConditions").value = quote.conditions || "";
     document.getElementById("qStatus").value = quote.status || "borrador";
+    fillClientSelect(quote.client_id || "");
+    fillProjectSelect(quote.client_id || "", quote.project_id || "");
     const items = Array.isArray(quote.line_items) ? quote.line_items : [];
     quoteLines = items.map((it) => ({
       description: it.description || "",
@@ -1325,9 +1443,15 @@
     w.document.close();
   }
 
-  document.getElementById("newQuoteBtn")?.addEventListener("click", () => {
-    resetQuoteForm();
+  document.getElementById("newQuoteBtn")?.addEventListener("click", async () => {
     showQuoteWorkspace(true);
+    wireQuoteLookups();
+    try {
+      await ensureQuoteLookups();
+    } catch (e) {
+      toast(e.message, true);
+    }
+    resetQuoteForm();
   });
   document.getElementById("closeQuoteForm")?.addEventListener("click", () => showQuoteWorkspace(false));
   document.getElementById("cancelQuoteForm")?.addEventListener("click", () => {
@@ -1406,6 +1530,8 @@
       return toast("Agrega al menos una partida", true);
     }
     const payload = {
+      client_id: document.getElementById("qClientSelect")?.value || null,
+      project_id: document.getElementById("qProjectSelect")?.value || null,
       client_name: clientName,
       client_company: document.getElementById("qClientCompany").value,
       client_email: document.getElementById("qClientEmail").value,
